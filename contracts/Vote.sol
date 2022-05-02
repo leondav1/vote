@@ -12,16 +12,6 @@ contract VoteContract is Ownable {
     uint public price = 10000000000000000; // сумма участия в голосовании 0.01 eth
     uint public summFee = 0; // сумма комиссий, которую можно вывести
 
-    // constructor() {
-    //     owner = msg.sender;
-    // }
-
-    // modifier onlyOwner() {
-    //     require(msg.sender == owner);
-    //     _;
-    // }
-
-
     // Кандидат
     struct Candidate {
         uint candyNum;

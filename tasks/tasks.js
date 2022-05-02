@@ -6,7 +6,6 @@ const VoteArtefact = require('../artifacts/contracts/Vote.sol/VoteContract.json'
 const { PRIVATE_KEY, CONTRACT_ADDR } = process.env;
 
 // Make a create vote
-// 0x5FbDB2315678afecb367f032d93F642f64180aa3
 task('create-vote', 'Create new vote')
     .addParam("title", "Title vote")
     .addParam("candy-names", "Candidates array")
@@ -25,7 +24,7 @@ task('create-vote', 'Create new vote')
         const targetTitle = web3.utils.toChecksumAddress(taskArgs.title);
         const targetCandyNames = web3.utils.toChecksumAddress(taskArgs.candy-names);
         const targetAddr = web3.utils.toChecksumAddress(taskArgs.candy-addrs);
-        // const targettitle = web3.utils.toChecksumAddress(taskArgs.account);
+        // const targetDuration = web3.utils.toChecksumAddress(taskArgs.duration);
         const sumFunds = await Contract.connect(ownerWalletWithProvider).createVote(
             targetTitle,
             targetCandyNames,

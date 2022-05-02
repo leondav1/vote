@@ -51,7 +51,6 @@ describe('VoteContract', function() {
             const tx = await votecontract.createVote("New vote", candys, addr, 0)
             const cVote = await votecontract.votes(1)
             const candidates = await votecontract.infoCandidate(1)
-    
             expect(cVote.title).to.eq("New vote")
             expect(candidates[0].name).to.eq(candys[0])
             const ts = await getTimestamp(tx.blockNumber)
@@ -63,7 +62,6 @@ describe('VoteContract', function() {
             const addr = [acc1.address, acc1.address]
             const tx = await votecontract.createVote("New vote", candys, addr, 0)
             const candidates = await votecontract.infoCandidate(1)
-    
             expect(candidates.length).to.eq(0)
         })
     })
@@ -73,7 +71,6 @@ describe('VoteContract', function() {
             const candys = ['candidate1', 'candidate2']
             const addr = [acc1.address, acc2.address]
             const tx = await votecontract.createVote("New vote", candys, addr, 0)
-            
             const sum = ethers.utils.parseEther("0.01")
             const tx1 = await votecontract.connect(acc5).addVoice(1, 1, {value: sum})
             const candidates = await votecontract.infoCandidate(1)
@@ -107,7 +104,6 @@ describe('VoteContract', function() {
             const candys = ['candidate1', 'candidate2']
             const addr = [acc1.address, acc2.address]
             const tx = await votecontract.createVote("New vote", candys, addr, 0)
-            
             const sum = ethers.utils.parseEther("0.005")
             try {
                 await votecontract.connect(acc5).addVoice(1, 1, {value: sum})
@@ -140,10 +136,7 @@ describe('VoteContract', function() {
             const fee = ((sum * FEE) / 100)
             const cVote = await votecontract.votes(1)
             const sumWith = ethers.utils.parseEther("0.0005")
-            // console.log("1=>", Number(await votecontract.summFee()))
-            
             const txWith = await votecontract.connect(owner).withdrawFee(acc5.address, sumWith)
-            // console.log("2=>", Number(await votecontract.summFee()))
             const feeOnBalance = fee - Number(sumWith)
             expect(Number(await votecontract.summFee())).to.eq(feeOnBalance)
         })
