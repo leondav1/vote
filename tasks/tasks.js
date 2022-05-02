@@ -6,10 +6,10 @@ const VoteArtefact = require('../artifacts/contracts/Vote.sol/VoteContract.json'
 const { PRIVATE_KEY, CONTRACT_ADDR } = process.env;
 
 // Make a create vote
-task('create-vote', 'Create new vote')
+task('createVote', 'Create new vote')
     .addParam("title", "Title vote")
-    .addParam("candy-names", "Candidates array")
-    .addParam("candy-addrs", "Array addresses")
+    .addParam("candynames", "Candidates array")
+    .addParam("candyaddrs", "Array addresses")
     // .addParam("duration", "Duration vote (sec). If 0 then default duration (3 days)")
     .setAction(async (taskArgs) => {
         const provider = new getDefaultProvider("rinkeby");
@@ -17,27 +17,28 @@ task('create-vote', 'Create new vote')
         const contractAddr = CONTRACT_ADDR;
         const Contract = new ethers.Contract(
             contractAddr,
-            CryptonArtefact.abi,
+            VoteArtefact.abi,
             ownerWalletWithProvider
         )
         
-        const targetTitle = web3.utils.toChecksumAddress(taskArgs.title);
-        const targetCandyNames = web3.utils.toChecksumAddress(taskArgs.candy-names);
-        const targetAddr = web3.utils.toChecksumAddress(taskArgs.candy-addrs);
+        const targetTitle = taskArgs.title;
+        const targetCandyNames = taskArgs.candynames;
+        const targetAddr = taskArgs.candyaddrs;
         // const targetDuration = web3.utils.toChecksumAddress(taskArgs.duration);
-        const sumFunds = await Contract.connect(ownerWalletWithProvider).createVote(
+        const createVote = await Contract.connect(ownerWalletWithProvider).createVote(
             targetTitle,
             targetCandyNames,
             targetAddr,
             0
         );
-        console.log('Create new vote', sumFunds.title)
+        console.log('Create new vote', createVote.title)
     });
 
 task('addvoice', 'Take part in the voting by indicating the number of the vote and the number of the candidate')
     .addParam("privatekey", "Account's private key")    
     .addParam("vote", "Vote number")
     .addParam("candy", "Candidate number")
+    .addParam("value", "Amount funds")
     .setAction(async (taskArgs) => {
         const provider = new getDefaultProvider("rinkeby");
         const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
@@ -45,33 +46,32 @@ task('addvoice', 'Take part in the voting by indicating the number of the vote a
         const contractAddr = CONTRACT_ADDR;
         const Contract = new ethers.Contract(
             contractAddr,
-            CryptonArtefact.abi,
+            VoteArtefact.abi,
             ownerWalletWithProvider
         )
         const senderAddr = senderWalletWithProvider.address
         const sum = ethers.utils.parseEther(taskArgs.value);
-        const vote = ethers.utils.parseEther(taskArgs.vote);
-        const candy = ethers.utils.parseEther(taskArgs.candy);
+        const vote = taskArgs.vote;
+        const candy = taskArgs.candy;
         const tx = await Contract.connect(senderWalletWithProvider).addVoice(vote, candy, { value: sum });
         tx.wait();
 
-        console.log('Balance on contract', contractAddr, web3.utils.fromWei(String(await Contract.connect(ownerWalletWithProvider).currentBalance()), "ether"), "ETH")
-        console.log('Balance on', senderAddr, web3.utils.fromWei(String(await Contract.connect(ownerWalletWithProvider).addrBalance(senderAddr)), "ether"), "ETH");
+        console.log('Voice added', tx)
     });
 
 task("voteinfo", "Get info of vote")
     .addParam("number", "Vote number")
-    .setAction(async () => {
+    .setAction(async (taskArgs) => {
       const provider = new getDefaultProvider("rinkeby");
       const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
       const contractAddr = CONTRACT_ADDR;
       const Contract = new ethers.Contract(
           contractAddr,
-          CryptonArtefact.abi,
+          VoteArtefact.abi,
           ownerWalletWithProvider
       )
       
-      const number = ethers.utils.parseEther(taskArgs.number);
+      const number = taskArgs.number;
       const vote = await Contract.connect(ownerWalletWithProvider).infoVote(number);
   
       console.log(vote);
@@ -79,17 +79,17 @@ task("voteinfo", "Get info of vote")
 
 task("candyinfo", "Get info of vote candidates")
     .addParam("number", "Vote number")
-    .setAction(async () => {
+    .setAction(async (taskArgs) => {
       const provider = new getDefaultProvider("rinkeby");
       const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
       const contractAddr = CONTRACT_ADDR;
       const Contract = new ethers.Contract(
           contractAddr,
-          CryptonArtefact.abi,
+          VoteArtefact.abi,
           ownerWalletWithProvider
       )
       
-      const number = ethers.utils.parseEther(taskArgs.number);
+      const number = taskArgs.number;
       const candidates = await Contract.connect(ownerWalletWithProvider).infoCandidate(number);
   
       console.log(candidates);
@@ -97,17 +97,17 @@ task("candyinfo", "Get info of vote candidates")
 
 task("partinfo", "Get info of vote participants")
     .addParam("number", "Vote number")
-    .setAction(async () => {
+    .setAction(async (taskArgs) => {
       const provider = new getDefaultProvider("rinkeby");
       const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
       const contractAddr = CONTRACT_ADDR;
       const Contract = new ethers.Contract(
           contractAddr,
-          CryptonArtefact.abi,
+          VoteArtefact.abi,
           ownerWalletWithProvider
       )
       
-      const number = ethers.utils.parseEther(taskArgs.number);
+      const number = taskArgs.number;
       const participants = await Contract.connect(ownerWalletWithProvider).infoParticipants(number);
   
       console.log(participants);
@@ -115,18 +115,34 @@ task("partinfo", "Get info of vote participants")
 
 task("voteend", "End vote")
     .addParam("number", "Vote number")
-    .setAction(async () => {
+    .setAction(async (taskArgs) => {
       const provider = new getDefaultProvider("rinkeby");
       const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
       const contractAddr = CONTRACT_ADDR;
       const Contract = new ethers.Contract(
           contractAddr,
-          CryptonArtefact.abi,
+          VoteArtefact.abi,
           ownerWalletWithProvider
       )
       
-      const number = ethers.utils.parseEther(taskArgs.number);
+      const number = taskArgs.number;
       const endVote = await Contract.connect(ownerWalletWithProvider).endVote(number);
   
       console.log("Vote stopped:", endVote);
+    });
+
+task("balance", "View contract balance")
+    .setAction(async (taskArgs) => {
+      const provider = new getDefaultProvider("rinkeby");
+      const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
+      const contractAddr = CONTRACT_ADDR;
+      const Contract = new ethers.Contract(
+          contractAddr,
+          VoteArtefact.abi,
+          ownerWalletWithProvider
+      )
+      
+      const balance = await Contract.connect(ownerWalletWithProvider).currentBalance();
+  
+      console.log("Contract balance:", web3.utils.fromWei(String(balance), "ether"), "ETH");
     });
