@@ -21,9 +21,9 @@ task('createVote', 'Create new vote')
             ownerWalletWithProvider
         )
         
-        const targetTitle = taskArgs.title;
-        const targetCandyNames = taskArgs.candynames;
-        const targetAddr = taskArgs.candyaddrs;
+        const targetTitle = taskArgs.title
+        const targetCandyNames = taskArgs.candynames.split(",")
+        const targetAddr = taskArgs.candyaddrs.split(",")
         // const targetDuration = web3.utils.toChecksumAddress(taskArgs.duration);
         const createVote = await Contract.connect(ownerWalletWithProvider).createVote(
             targetTitle,
@@ -31,7 +31,7 @@ task('createVote', 'Create new vote')
             targetAddr,
             0
         );
-        console.log('Create new vote', createVote.title)
+        console.log('Create new vote', createVote)
     });
 
 task('addvoice', 'Take part in the voting by indicating the number of the vote and the number of the candidate')
@@ -43,13 +43,14 @@ task('addvoice', 'Take part in the voting by indicating the number of the vote a
         const provider = new getDefaultProvider("rinkeby");
         const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider);
         const senderWalletWithProvider = new ethers.Wallet(taskArgs.privatekey, provider);
+        provider.getGasPrice()
         const contractAddr = CONTRACT_ADDR;
         const Contract = new ethers.Contract(
             contractAddr,
             VoteArtefact.abi,
             ownerWalletWithProvider
         )
-        const senderAddr = senderWalletWithProvider.address
+        // const senderAddr = senderWalletWithProvider.address
         const sum = ethers.utils.parseEther(taskArgs.value);
         const vote = taskArgs.vote;
         const candy = taskArgs.candy;
@@ -58,6 +59,29 @@ task('addvoice', 'Take part in the voting by indicating the number of the vote a
 
         console.log('Voice added', tx)
     });
+
+task("withdraw", "Withdraw fee to a specific address in a specific amount")
+  .addParam("account", "The address of the account to which the withdrawal is made")
+  .addParam("value", "Amount funds")
+  .setAction(async (taskArgs) => {
+    const provider = new getDefaultProvider("rinkeby")
+    const ownerWalletWithProvider = new ethers.Wallet(`0x${PRIVATE_KEY}`, provider)
+    provider.getGasPrice()
+    const contractAddr = CONTRACT_ADDR
+    const Contract = new ethers.Contract(
+        contractAddr,
+        VoteArtefact.abi,
+        ownerWalletWithProvider
+    )
+
+    const _to = web3.utils.toChecksumAddress(taskArgs.account)
+    const sum = ethers.utils.parseEther(taskArgs.value)
+
+    const tx = await Contract.connect(ownerWalletWithProvider).withdrawFee(_to, sum)
+    tx.wait()
+
+    console.log(tx)
+    })
 
 task("voteinfo", "Get info of vote")
     .addParam("number", "Vote number")
@@ -75,7 +99,7 @@ task("voteinfo", "Get info of vote")
       const vote = await Contract.connect(ownerWalletWithProvider).infoVote(number);
   
       console.log(vote);
-    });
+    })
 
 task("candyinfo", "Get info of vote candidates")
     .addParam("number", "Vote number")
@@ -93,7 +117,7 @@ task("candyinfo", "Get info of vote candidates")
       const candidates = await Contract.connect(ownerWalletWithProvider).infoCandidate(number);
   
       console.log(candidates);
-    });
+    })
 
 task("partinfo", "Get info of vote participants")
     .addParam("number", "Vote number")
@@ -111,7 +135,7 @@ task("partinfo", "Get info of vote participants")
       const participants = await Contract.connect(ownerWalletWithProvider).infoParticipants(number);
   
       console.log(participants);
-    });
+    })
 
 task("voteend", "End vote")
     .addParam("number", "Vote number")
@@ -129,7 +153,7 @@ task("voteend", "End vote")
       const endVote = await Contract.connect(ownerWalletWithProvider).endVote(number);
   
       console.log("Vote stopped:", endVote);
-    });
+    })
 
 task("balance", "View contract balance")
     .setAction(async (taskArgs) => {
@@ -145,4 +169,4 @@ task("balance", "View contract balance")
       const balance = await Contract.connect(ownerWalletWithProvider).currentBalance();
   
       console.log("Contract balance:", web3.utils.fromWei(String(balance), "ether"), "ETH");
-    });
+    })
