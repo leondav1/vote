@@ -93,8 +93,9 @@ describe('VoteContract', function() {
             
             const sum = ethers.utils.parseEther("0.01")
             const tx1 = await votecontract.connect(acc5).addVoice(1, 1, {value: sum})
+            const tx2 = await votecontract.connect(acc4).addVoice(1, 1, {value: sum})
             try {
-                await votecontract.connect(acc5).addVoice(1, 2, {value: sum})
+                await votecontract.connect(acc4).addVoice(1, 2, {value: sum})
             } catch (error) {
                 expect(error.message).to.eq("VM Exception while processing transaction: reverted with reason string 'you cannot re-vote'")
             }
@@ -230,9 +231,11 @@ describe('VoteContract', function() {
         it('Must be a participant', async() => {
             const candys = ['candidate1', 'candidate2']
             const addr = [acc1.address, acc2.address]
-            const tx = await votecontract.createVote("New vote", candys, addr, 2)
+            const tx = await votecontract.createVote("New vote", candys, addr, 3)
             const sum = ethers.utils.parseEther("0.01")
-            sleep(3000)
+            const tx1 = await votecontract.connect(acc5).addVoice(1, 1, {value: sum})
+            const tx2 = await votecontract.connect(acc3).addVoice(1, 1, {value: sum})
+            sleep(4000)
             
             try {
                 const eVote = await votecontract.connect(acc4).endVote(1)
