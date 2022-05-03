@@ -30,7 +30,7 @@ OWNER=""
 7. **npx hardhat**
 
 ### Tasks
-## Request examples
+#### Request examples
 
 1. Create vote
 ```
@@ -39,12 +39,12 @@ npx hardhat createVote --title <title> --candynames <name1, name2, ...> --candya
 2. Add voice
 ```
 npx hardhat addvoice --privatekey <YOUR PRIVATE KEY> --vote <number vote> --candy <numder candidate> --value <amount>
-Amount must be more than 0.01 ether (in wei)
+Amount must be equal or more than 0.01 ether (in ether)
 ```
 3. Withdraw fee
 ```
 npx hardhat withdraw --account <address> --value <amount>
-Amount must be in wei
+Amount must be in ether
 ```
 4. Get info of vote
 ```
